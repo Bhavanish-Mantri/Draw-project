@@ -1,46 +1,52 @@
 const canvas = document.getElementById("canvas");
-const increaseButton = document.getElementById("increase");
-const decreaseButton = document.getElementById("decrease");
-const sizeElement = document.getElementById("size");
-const colorElement = document.getElementById("color");
-const clearElement = document.getElementById("clear");
 const ctx = canvas.getContext("2d");
+
+const increaseBtn = document.getElementById("increase");
+const decreaseBtn = document.getElementById("decrease");
+const sizeEl = document.getElementById("size");
+const colorEl = document.getElementById("color");
+const clearBtn = document.getElementById("clear");
+const eraserBtn = document.getElementById("eraser");
+const penBtn = document.getElementById("pen");
 
 let size = 10;
 let color = "#000000";
-let x;
-let y;
 let isPressed = false;
+let x, y;
+let mode = "draw";
 
-// 🔥 Resize canvas properly
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height =
     window.innerHeight - document.querySelector(".toolbox").offsetHeight;
 }
-
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-const drawCircle = (x, y) => {
+function drawCircle(x, y) {
   ctx.beginPath();
   ctx.arc(x, y, size, 0, Math.PI * 2);
-  ctx.fillStyle = color;
   ctx.fill();
-};
+}
 
-const drawLine = (x1, y1, x2, y2) => {
+function drawLine(x1, y1, x2, y2) {
   ctx.beginPath();
   ctx.moveTo(x1, y1);
   ctx.lineTo(x2, y2);
-  ctx.strokeStyle = color;
   ctx.lineWidth = size * 2;
+  ctx.lineCap = "round";
   ctx.stroke();
-};
+}
 
-const updateSizeOnScreen = () => {
-  sizeElement.innerText = size;
-};
+function setDrawMode() {
+  ctx.globalCompositeOperation = "source-over";
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+}
+
+function setEraseMode() {
+  ctx.globalCompositeOperation = "destination-out";
+}
 
 canvas.addEventListener("mousedown", (e) => {
   isPressed = true;
@@ -67,24 +73,36 @@ canvas.addEventListener("mousemove", (e) => {
   y = y2;
 });
 
-increaseButton.addEventListener("click", () => {
-  size += 5;
-  if (size > 50) size = 50;
-  updateSizeOnScreen();
+increaseBtn.addEventListener("click", () => {
+  size = Math.min(size + 5, 50);
+  sizeEl.innerText = size;
 });
 
-decreaseButton.addEventListener("click", () => {
-  size -= 5;
-  if (size < 5) size = 5;
-  updateSizeOnScreen();
+decreaseBtn.addEventListener("click", () => {
+  size = Math.max(size - 5, 5);
+  sizeEl.innerText = size;
 });
 
-colorElement.addEventListener("change", (e) => {
+colorEl.addEventListener("change", (e) => {
   color = e.target.value;
+  if (mode === "draw") setDrawMode();
 });
 
-clearElement.addEventListener("click", () => {
+// Pen mode
+penBtn.addEventListener("click", () => {
+  mode = "draw";
+  setDrawMode();
+});
+
+eraserBtn.addEventListener("click", () => {
+  mode = "erase";
+  setEraseMode();
+});
+
+clearBtn.addEventListener("click", () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 });
 
-updateSizeOnScreen();
+sizeEl.innerText = size;
+setDrawMode();
+
